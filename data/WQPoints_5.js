@@ -1,0 +1,1 @@
+var json_WQPoints_5 = {"type":"FeatureCollection","name":"WQPoints_5","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"features":[{"type":"Feature","properties":{"Name":"WQuality1"},"geometry":{"type":"Point","coordinates":[27.911132478243353,-26.087222068352961]}}]}

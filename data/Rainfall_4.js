@@ -1,0 +1,1 @@
+var json_Rainfall_4 = {"type":"FeatureCollection","name":"Rainfall_4","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"features":[{"type":"Feature","properties":{"id":null,"Name":"Weather Station1"},"geometry":{"type":"Point","coordinates":[27.918051957404373,-26.089054674317371]}}]}

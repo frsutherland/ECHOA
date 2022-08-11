@@ -8,10 +8,11 @@
         <meta name="apple-mobile-web-app-capable" content="yes">
         <link rel="stylesheet" href="css/leaflet.css">
         <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
         <link rel="stylesheet" href="css/leaflet-measure.css">
         <style>
         #map {
-            width: 1576px;
+            width: 1073px;
             height: 868px;
         }
         </style>
@@ -31,10 +32,13 @@
         <script src="js/rbush.min.js"></script>
         <script src="js/labelgun.min.js"></script>
         <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
         <script src="js/leaflet-measure.js"></script>
         <script src="data/PrimaryDams_1.js"></script>
         <script src="data/SecondaryDams_2.js"></script>
         <script src="data/ObservationPoints_3.js"></script>
+        <script src="data/Rainfall_4.js"></script>
+        <script src="data/WQPoints_5.js"></script>
         <script>
         var highlightLayer;
         function highlightFeature(e) {
@@ -54,7 +58,7 @@
         }
         var map = L.map('map', {
             zoomControl:true, maxZoom:28, minZoom:1
-        })
+        }).fitBounds([[-26.097690456797384,27.906499016],[-26.082566818773113,27.92520273]]);
         var hash = new L.Hash(map);
         map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
         var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
@@ -72,9 +76,6 @@
         .className += ' fas fa-ruler';
         var bounds_group = new L.featureGroup([]);
         function setBounds() {
-            if (bounds_group.getLayers().length) {
-                map.fitBounds(bounds_group.getBounds());
-            }
             map.setMaxBounds(map.getBounds());
         }
         map.createPane('pane_GoogleMaps_0');
@@ -108,41 +109,31 @@
             });
             var popupContent = '<table>\
                     <tr>\
-                        <th scope="row">Name</th>\
-                        <td>' + (feature.properties['Name'] !== null ? autolinker.link(feature.properties['Name'].toLocaleString()) : '') + '</td>\
+                        <td colspan="2"><strong>Name</strong><br />' + (feature.properties['Name'] !== null ? autolinker.link(feature.properties['Name'].toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
-                        <td colspan="2">' + (feature.properties['descriptio'] !== null ? autolinker.link(feature.properties['descriptio'].toLocaleString()) : '') + '</td>\
+                        <th scope="row">Descr</th>\
+                        <td>' + (feature.properties['Descr'] !== null ? autolinker.link(feature.properties['Descr'].toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
-                        <td colspan="2">' + (feature.properties['timestamp'] !== null ? autolinker.link(feature.properties['timestamp'].toLocaleString()) : '') + '</td>\
+                        <th scope="row">Volume</th>\
+                        <td>' + (feature.properties['Volume'] !== null ? autolinker.link(feature.properties['Volume'].toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
-                        <td colspan="2">' + (feature.properties['begin'] !== null ? autolinker.link(feature.properties['begin'].toLocaleString()) : '') + '</td>\
+                        <th scope="row">Surface</th>\
+                        <td>' + (feature.properties['Surface'] !== null ? autolinker.link(feature.properties['Surface'].toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
-                        <td colspan="2">' + (feature.properties['end'] !== null ? autolinker.link(feature.properties['end'].toLocaleString()) : '') + '</td>\
+                        <th scope="row">Pumped</th>\
+                        <td>' + (feature.properties['Pumped'] !== null ? autolinker.link(feature.properties['Pumped'].toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
-                        <td colspan="2">' + (feature.properties['altitudeMo'] !== null ? autolinker.link(feature.properties['altitudeMo'].toLocaleString()) : '') + '</td>\
+                        <th scope="row">Evap Rate</th>\
+                        <td>' + (feature.properties['Evap Rate'] !== null ? autolinker.link(feature.properties['Evap Rate'].toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
-                        <td colspan="2">' + (feature.properties['tessellate'] !== null ? autolinker.link(feature.properties['tessellate'].toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['extrude'] !== null ? autolinker.link(feature.properties['extrude'].toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['visibility'] !== null ? autolinker.link(feature.properties['visibility'].toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['drawOrder'] !== null ? autolinker.link(feature.properties['drawOrder'].toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['icon'] !== null ? autolinker.link(feature.properties['icon'].toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                        <th scope="row">Rainfall</th>\
+                        <td>' + (feature.properties['Rainfall'] !== null ? autolinker.link(feature.properties['Rainfall'].toLocaleString()) : '') + '</td>\
                     </tr>\
                 </table>';
             layer.bindPopup(popupContent, {maxHeight: 400});
@@ -154,10 +145,12 @@
                 opacity: 1,
                 color: 'rgba(9,241,249,1.0)',
                 dashArray: '',
-                lineCap: 'square',
-                lineJoin: 'bevel',
-                weight: 4.0,
-                fillOpacity: 0,
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 4.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,127,0,0.0)',
                 interactive: true,
             }
         }
@@ -193,8 +186,31 @@
             });
             var popupContent = '<table>\
                     <tr>\
-                        <th scope="row">NAME</th>\
-                        <td>' + (feature.properties['NAME'] !== null ? autolinker.link(feature.properties['NAME'].toLocaleString()) : '') + '</td>\
+                        <td colspan="2"><strong>Name</strong><br />' + (feature.properties['Name'] !== null ? autolinker.link(feature.properties['Name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Descr</th>\
+                        <td>' + (feature.properties['Descr'] !== null ? autolinker.link(feature.properties['Descr'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Pumped</th>\
+                        <td>' + (feature.properties['Pumped'] !== null ? autolinker.link(feature.properties['Pumped'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Volume</th>\
+                        <td>' + (feature.properties['Volume'] !== null ? autolinker.link(feature.properties['Volume'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Surface</th>\
+                        <td>' + (feature.properties['Surface'] !== null ? autolinker.link(feature.properties['Surface'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Evap Rate</th>\
+                        <td>' + (feature.properties['Evap Rate'] !== null ? autolinker.link(feature.properties['Evap Rate'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Rainfall</th>\
+                        <td>' + (feature.properties['Rainfall'] !== null ? autolinker.link(feature.properties['Rainfall'].toLocaleString()) : '') + '</td>\
                     </tr>\
                 </table>';
             layer.bindPopup(popupContent, {maxHeight: 400});
@@ -245,24 +261,15 @@
             });
             var popupContent = '<table>\
                     <tr>\
-                        <th scope="row">NAME</th>\
-                        <td>' + (feature.properties['NAME'] !== null ? autolinker.link(feature.properties['NAME'].toLocaleString()) : '') + '</td>\
+                        <td colspan="2"><strong>NAME</strong><br />' + (feature.properties['NAME'] !== null ? autolinker.link(feature.properties['NAME'].toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
                         <th scope="row">Photos</th>\
                         <td>' + (feature.properties['Photos'] !== null ? '<img src="images/' + String(feature.properties['Photos']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
                     </tr>\
                     <tr>\
-                        <td colspan="2">' + (feature.properties['auxiliary_'] !== null ? autolinker.link(feature.properties['auxiliary_'].toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['auxiliar_1'] !== null ? autolinker.link(feature.properties['auxiliar_1'].toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['auxiliar_2'] !== null ? autolinker.link(feature.properties['auxiliar_2'].toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['auxiliar_3'] !== null ? autolinker.link(feature.properties['auxiliar_3'].toLocaleString()) : '') + '</td>\
+                        <th scope="row">DESC</th>\
+                        <td>' + (feature.properties['DESC'] !== null ? autolinker.link(feature.properties['DESC'].toLocaleString()) : '') + '</td>\
                     </tr>\
                 </table>';
             layer.bindPopup(popupContent, {maxHeight: 400});
@@ -326,11 +333,186 @@
         ]});
         bounds_group.addLayer(layer_ObservationPoints_3);
         map.addLayer(layer_ObservationPoints_3);
+        function pop_Rainfall_4(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Name</th>\
+                        <td>' + (feature.properties['Name'] !== null ? autolinker.link(feature.properties['Name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Rainfall_4_0() {
+            return {
+                pane: 'pane_Rainfall_4',
+                radius: 8.0,
+                opacity: 1,
+                color: 'rgba(0,36,237,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(221,0,237,0.0)',
+                interactive: true,
+            }
+        }
+        function style_Rainfall_4_1() {
+            return {
+                pane: 'pane_Rainfall_4',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(32,62,198,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 3.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(9,241,249,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Rainfall_4');
+        map.getPane('pane_Rainfall_4').style.zIndex = 404;
+        map.getPane('pane_Rainfall_4').style['mix-blend-mode'] = 'normal';
+        var layer_Rainfall_4 = new L.geoJson.multiStyle(json_Rainfall_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Rainfall_4',
+            layerName: 'layer_Rainfall_4',
+            pane: 'pane_Rainfall_4',
+            onEachFeature: pop_Rainfall_4,
+            pointToLayers: [function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.shapeMarker(latlng, style_Rainfall_4_0(feature));
+            },function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.shapeMarker(latlng, style_Rainfall_4_1(feature));
+            },
+        ]});
+        bounds_group.addLayer(layer_Rainfall_4);
+        map.addLayer(layer_Rainfall_4);
+        function pop_WQPoints_5(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Name</th>\
+                        <td>' + (feature.properties['Name'] !== null ? autolinker.link(feature.properties['Name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_WQPoints_5_0() {
+            return {
+                pane: 'pane_WQPoints_5',
+                shape: 'square',
+                radius: 8.0,
+                opacity: 1,
+                color: 'rgba(51,160,44,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(9,241,32,0.0)',
+                interactive: true,
+            }
+        }
+        function style_WQPoints_5_1() {
+            return {
+                pane: 'pane_WQPoints_5',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 3.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(9,241,32,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_WQPoints_5');
+        map.getPane('pane_WQPoints_5').style.zIndex = 405;
+        map.getPane('pane_WQPoints_5').style['mix-blend-mode'] = 'screen';
+        var layer_WQPoints_5 = new L.geoJson.multiStyle(json_WQPoints_5, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_WQPoints_5',
+            layerName: 'layer_WQPoints_5',
+            pane: 'pane_WQPoints_5',
+            onEachFeature: pop_WQPoints_5,
+            pointToLayers: [function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_WQPoints_5_0(feature));
+            },function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_WQPoints_5_1(feature));
+            },
+        ]});
+        bounds_group.addLayer(layer_WQPoints_5);
+        map.addLayer(layer_WQPoints_5);
         map.on("zoomend", function(e) {
             if (map.getZoom() <= 19 && map.getZoom() >= 2) {
                 map.addLayer(layer_ObservationPoints_3);
             } else if (map.getZoom() > 19 || map.getZoom() < 2) {
                 map.removeLayer(layer_ObservationPoints_3);
+            }
+            if (map.getZoom() <= 19 && map.getZoom() >= 2) {
+                map.addLayer(layer_WQPoints_5);
+            } else if (map.getZoom() > 19 || map.getZoom() < 2) {
+                map.removeLayer(layer_WQPoints_5);
             }
         });
             if (map.getZoom() <= 19 && map.getZoom() >= 2) {
@@ -338,6 +520,21 @@
             } else if (map.getZoom() > 19 || map.getZoom() < 2) {
                 map.removeLayer(layer_ObservationPoints_3);
             }
+            if (map.getZoom() <= 19 && map.getZoom() >= 2) {
+                map.addLayer(layer_WQPoints_5);
+            } else if (map.getZoom() > 19 || map.getZoom() < 2) {
+                map.removeLayer(layer_WQPoints_5);
+            }
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
         map.on("zoomend", function(){
 
                 if (map.hasLayer(layer_ObservationPoints_3)) {
@@ -351,6 +548,17 @@
                         });
                     }
                 }
+                if (map.hasLayer(layer_WQPoints_5)) {
+                    if (map.getZoom() <= 19 && map.getZoom() >= 19) {
+                        layer_WQPoints_5.eachLayer(function (layer) {
+                            layer.openTooltip();
+                        });
+                    } else {
+                        layer_WQPoints_5.eachLayer(function (layer) {
+                            layer.closeTooltip();
+                        });
+                    }
+                }
         });
         setBounds();
         var i = 0;
@@ -359,7 +567,7 @@
                 feature: layer.feature,
                 variables: {}
             };
-            layer.bindTooltip((layer.feature.properties['Name'] !== null?String('<div style="color: #09f1f9; font-size: 8pt; font-weight: bold; font-family: \'Arial\', sans-serif;">' + layer.feature.properties['Name']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_PrimaryDams_1'});
+            layer.bindTooltip((layer.feature.properties['Name'] !== null?String('<div style="color: #09f1f9; font-size: 3pt; font-weight: bold; font-family: \'Arial\', sans-serif;">' + layer.feature.properties['Name']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_PrimaryDams_1'});
             labels.push(layer);
             totalMarkers += 1;
               layer.added = true;
@@ -372,7 +580,7 @@
                 feature: layer.feature,
                 variables: {}
             };
-            layer.bindTooltip((layer.feature.properties['NAME'] !== null?String('<div style="color: #ff7f00; font-size: 3pt; font-weight: bold; font-family: \'Arial\', sans-serif;">' + layer.feature.properties['NAME']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_SecondaryDams_2'});
+            layer.bindTooltip((layer.feature.properties['Name'] !== null?String('<div style="color: #ff7f00; font-size: 3pt; font-weight: bold; font-family: \'Arial\', sans-serif;">' + layer.feature.properties['Name']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_SecondaryDams_2'});
             labels.push(layer);
             totalMarkers += 1;
               layer.added = true;
@@ -392,6 +600,32 @@
               addLabel(layer, i);
               i++;
         });
+        var i = 0;
+        layer_Rainfall_4.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Name'] !== null?String('<div style="color: #323232; font-size: 6pt; font-weight: bold; font-family: \'Arial\', sans-serif;">' + layer.feature.properties['Name']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_Rainfall_4'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_WQPoints_5.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Name'] !== null?String('<div style="color: #323232; font-size: 6pt; font-weight: bold; font-family: \'Arial\', sans-serif;">' + layer.feature.properties['Name']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_WQPoints_5'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
                 if (map.hasLayer(layer_ObservationPoints_3)) {
                     if (map.getZoom() <= 19 && map.getZoom() >= 19) {
                         layer_ObservationPoints_3.eachLayer(function (layer) {
@@ -403,15 +637,26 @@
                         });
                     }
                 }
-        resetLabels([layer_PrimaryDams_1,layer_SecondaryDams_2,layer_ObservationPoints_3]);
+                if (map.hasLayer(layer_WQPoints_5)) {
+                    if (map.getZoom() <= 19 && map.getZoom() >= 19) {
+                        layer_WQPoints_5.eachLayer(function (layer) {
+                            layer.openTooltip();
+                        });
+                    } else {
+                        layer_WQPoints_5.eachLayer(function (layer) {
+                            layer.closeTooltip();
+                        });
+                    }
+                }
+        resetLabels([layer_PrimaryDams_1,layer_SecondaryDams_2,layer_ObservationPoints_3,layer_Rainfall_4,layer_WQPoints_5]);
         map.on("zoomend", function(){
-            resetLabels([layer_PrimaryDams_1,layer_SecondaryDams_2,layer_ObservationPoints_3]);
+            resetLabels([layer_PrimaryDams_1,layer_SecondaryDams_2,layer_ObservationPoints_3,layer_Rainfall_4,layer_WQPoints_5]);
         });
         map.on("layeradd", function(){
-            resetLabels([layer_PrimaryDams_1,layer_SecondaryDams_2,layer_ObservationPoints_3]);
+            resetLabels([layer_PrimaryDams_1,layer_SecondaryDams_2,layer_ObservationPoints_3,layer_Rainfall_4,layer_WQPoints_5]);
         });
         map.on("layerremove", function(){
-            resetLabels([layer_PrimaryDams_1,layer_SecondaryDams_2,layer_ObservationPoints_3]);
+            resetLabels([layer_PrimaryDams_1,layer_SecondaryDams_2,layer_ObservationPoints_3,layer_Rainfall_4,layer_WQPoints_5]);
         });
         </script>
     </body>
